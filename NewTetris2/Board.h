@@ -8,7 +8,7 @@
 
 #define LEFTSIDE 350
 #define UPSIDE 200
-#define WIDTH 10  //盤面の横のマス数
+//#define WIDTH 10  //盤面の横のマス数
 #define WALLTHICK 3
 #define PIX 10  //1マスの辺の長さ
 #define VOID 0
@@ -35,7 +35,6 @@ class Board {
 private:
 
 protected:
-	//int mino[HEIGHT + 2 + 2 * WALLTHICK][WIDTH + 2 * WALLTHICK];  //ミノの種類 0:無　1:壁 2～8:固定ミノ 9～15:今動かしているミノ
 	vector<vector<int>> mino;
 	bool isFixedMino(int x, int y);
 	bool CheckRotate(int gap_x, int gap_y, int r, Mino& current);
@@ -67,5 +66,6 @@ public:
 	virtual void FallLines(vector<bool>& deletehorizon, vector<bool>& deletevertical) {}
 
 	virtual int GetHEIGHT();
+	virtual int GetWIDTH();
 	virtual void ShowRotate(int r, int k, Style& style) {}
 };

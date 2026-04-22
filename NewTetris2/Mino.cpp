@@ -13,13 +13,14 @@ int form[7][4][4] = {
 };
 
 
-Mino::Mino() {
+Mino::Mino(int cx) {
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 4; j++) {
 			now_form[i][j] = VOID;
 			rotate_form[i][j] = VOID;
 		}
 	}
+	CENTER_X = cx;
 	now_mino_x = CENTER_X;
 	now_mino_y = UP_Y;
 	shade_y = UP_Y;

@@ -3,6 +3,7 @@
 Menu::Menu() {
 	state = Scene::Title;
 	menuselect = 0;
+	maxstage = 0;
 }
 
 void Menu::ShowMenu() {
@@ -140,7 +141,7 @@ void Menu::MenuMain() {
 			}
 			case Scene::Playing: {
 				Game* game;
-				game = new Game();
+				game = new Game(6);
 				game->MainGame(record);
 				ShowRank(*game);
 				state = Scene::GameOver;
@@ -155,8 +156,9 @@ void Menu::MenuMain() {
 			}
 			case Scene::Challenge: {
 				Challenge* game;
-				game = new Challenge();
+				game = new Challenge(maxstage);
 				game->MainChallenge(record);
+				maxstage = game->GetStage();
 				state = Scene::CGameOver;
 				ShowGameOver();
 				delete game;
@@ -169,7 +171,7 @@ void Menu::MenuMain() {
 			}
 			case Scene::Playing2: {
 				Game2* game;
-				game = new Game2();
+				game = new Game2(7);
 				game->MainGame(record);
 				//ShowRank(game2);
 				state = Scene::GameOver2;

@@ -12,12 +12,12 @@ const Offset diffTable[2][5] = {
 
 Board2::Board2()
 {
-	mino.resize(GetHEIGHT() + 2 + 2 * WALLTHICK, vector<int>(WIDTH + 2 * WALLTHICK));
+	mino.resize(GetHEIGHT() + 2 + 2 * WALLTHICK, vector<int>(GetWIDTH() + 2 * WALLTHICK));
 	for (int i = OFFSET_Y - 2; i < GetHEIGHT() + OFFSET_Y; i++)
-		for (int j = OFFSET_X; j < WIDTH + OFFSET_X; j++)
+		for (int j = OFFSET_X; j < GetWIDTH() + OFFSET_X; j++)
 			mino[i][j] = VOID;
 
-	for (int i = 0; i < WIDTH + 2 * WALLTHICK; i++)
+	for (int i = 0; i < GetWIDTH() + 2 * WALLTHICK; i++)
 	{
 		mino[0][i] = WALL;
 		mino[1][i] = WALL;
@@ -31,20 +31,22 @@ Board2::Board2()
 		mino[i][0] = WALL;
 		mino[i][1] = WALL;
 		mino[i][2] = WALL;
-		mino[i][13] = WALL;
-		mino[i][14] = WALL;
-		mino[i][15] = WALL;
+		mino[i][GetWIDTH() + 3] = WALL;
+		mino[i][GetWIDTH() + 4] = WALL;
+		mino[i][GetWIDTH() + 5] = WALL;
 	}//壁判定
 
-	rotate_board.resize(GetHEIGHT(), vector<int>(WIDTH));
-	for (int i = 0; i < 10; i++) {
-		for (int j = 0; j < 10; j++) {
+	rotate_board.resize(GetHEIGHT(), vector<int>(GetWIDTH()));
+	for (int i = 0; i < GetHEIGHT(); i++) {
+		for (int j = 0; j < GetWIDTH(); j++) {
 			rotate_board[i][j] = VOID;
 		}
 	}
 }
 
-int Board2::GetHEIGHT() { return 10; }
+int Board2::GetHEIGHT() { return 12; }
+
+int Board2::GetWIDTH() { return 12; }
 
 //他のミノと接触しているか
 bool Board2::isMino(int x, int y) {
@@ -82,7 +84,7 @@ bool Board2::CanRotateBoard(Mino& current) {
 		for (int j = 0; j < 4; j++) {
 			if (current.GetMino(j, i))
 			{
-				if (0 <= current.GetY() - OFFSET_Y + i && current.GetY() - OFFSET_Y + i<GetHEIGHT() && 0 <= current.GetX() - OFFSET_X + j && current.GetX() - OFFSET_X + j < WIDTH)
+				if (0 <= current.GetY() - OFFSET_Y + i && current.GetY() - OFFSET_Y + i<GetHEIGHT() && 0 <= current.GetX() - OFFSET_X + j && current.GetX() - OFFSET_X + j < GetWIDTH())
 				{
 					if (FIXEDI <= rotate_board[current.GetY() - OFFSET_Y + i][current.GetX() - OFFSET_X + j] && rotate_board[current.GetY() - OFFSET_Y + i][current.GetX() - OFFSET_X + j] <= FIXEDO)
 						return false;
@@ -96,7 +98,7 @@ bool Board2::CanRotateBoard(Mino& current) {
 //配列初期化
 void Board2::ResetRotateBoard() {
 	for (int i = 0; i < GetHEIGHT(); i++) {
-		for (int j = 0; j < WIDTH; j++) {
+		for (int j = 0; j < GetWIDTH(); j++) {
 			rotate_board[i][j] = VOID;
 		}
 	}
@@ -105,23 +107,23 @@ void Board2::ResetRotateBoard() {
 //回転後の盤面を生成
 void Board2::CreateRotateBoard(int r) {
 	if (r == 1) {//右回転
-		for (int i = 0; i < WIDTH; i++) {
-			for (int j = 0; j < GetHEIGHT(); j++) {
-				rotate_board[j][9 - i] = mino[i + OFFSET_Y][j + OFFSET_X];
+		for (int i = 0; i < GetHEIGHT(); i++) {
+			for (int j = 0; j < GetWIDTH(); j++) {
+				rotate_board[j][GetHEIGHT() - i - 1] = mino[i + OFFSET_Y][j + OFFSET_X];
 			}
 		}
 	}
 	else if(r==-1){//左回転
-		for (int i = 0; i < WIDTH; i++) {
-			for (int j = 0; j < GetHEIGHT(); j++) {
-				rotate_board[9 - j][i] = mino[i + OFFSET_Y][j + OFFSET_X];
+		for (int i = 0; i < GetHEIGHT(); i++) {
+			for (int j = 0; j < GetWIDTH(); j++) {
+				rotate_board[GetWIDTH() - j - 1][i] = mino[i + OFFSET_Y][j + OFFSET_X];
 			}
 		}
 	}
 	else {
-		for (int i = 0; i < WIDTH; i++) {
-			for (int j = 0; j < GetHEIGHT(); j++) {
-				rotate_board[9 - i][9 - j] = mino[i + OFFSET_Y][j + OFFSET_X];
+		for (int i = 0; i < GetHEIGHT(); i++) {
+			for (int j = 0; j < GetWIDTH(); j++) {
+				rotate_board[GetHEIGHT() - i - 1][GetWIDTH() - j - 1] = mino[i + OFFSET_Y][j + OFFSET_X];
 			}
 		}
 	}
@@ -130,7 +132,7 @@ void Board2::CreateRotateBoard(int r) {
 //盤面回転
 void Board2::RotateBoard() {
 	for (int i = 0; i < GetHEIGHT(); i++) {
-		for (int j = 0; j < WIDTH; j++) {
+		for (int j = 0; j < GetWIDTH(); j++) {
 			mino[i+OFFSET_Y][j+OFFSET_X] = rotate_board[i][j];
 		}
 	}
@@ -140,9 +142,10 @@ void Board2::RotateBoard() {
 //ライン消去
 bool Board2::ClearLines(vector<bool>& deletehorizon, vector<bool>& deletevertical,int spinboard, Mino& current, vector<vector<bool>>& mem) {
 	bool canDelete = false;
+	//各高さでラインが消えるか判定
 	for (int i = 0; i < GetHEIGHT(); i++) {
 		deletehorizon[i] = true;
-		for (int j = 0; j < WIDTH; j++) {
+		for (int j = 0; j < GetWIDTH(); j++) {
 			if (!isFixedMino(j + OFFSET_X, i + OFFSET_Y))
 			{
 				deletehorizon[i] = false;
@@ -153,7 +156,8 @@ bool Board2::ClearLines(vector<bool>& deletehorizon, vector<bool>& deletevertica
 			canDelete = true;
 	}
 
-	for (int i = 0; i < WIDTH; i++) {
+	//各列でラインが消えるか判定
+	for (int i = 0; i < GetWIDTH(); i++) {
 		deletevertical[i] = true;
 		for (int j = 0; j < GetHEIGHT(); j++) {
 			if (!isFixedMino(i + OFFSET_X, j + OFFSET_Y))
@@ -166,6 +170,7 @@ bool Board2::ClearLines(vector<bool>& deletehorizon, vector<bool>& deletevertica
 			canDelete = true;
 	}
 
+	//Bスピンによるライン消去
 	if (spinboard != -1)
 	{
 		if(current.GetShape() == TetroMino::Imino || current.GetShape() == TetroMino::Omino)
@@ -173,9 +178,9 @@ bool Board2::ClearLines(vector<bool>& deletehorizon, vector<bool>& deletevertica
 			for (int i = 0; i < 4; i++) {
 				for (int j = 0; j < 4; j++) {
 					if (mem[i][j]) {
-						if (current.GetY() + i - OFFSET_Y < 10)
+						if (current.GetY() + i - OFFSET_Y < GetHEIGHT())
 							deletehorizon[current.GetY() + i - OFFSET_Y] = true;
-						if (current.GetX() + j - OFFSET_X < 10)
+						if (current.GetX() + j - OFFSET_X < GetWIDTH())
 							deletevertical[current.GetX() + j - OFFSET_X] = true;
 					}
 				}
@@ -185,9 +190,9 @@ bool Board2::ClearLines(vector<bool>& deletehorizon, vector<bool>& deletevertica
 			for (int i = 0; i < 3; i++) {
 				for (int j = 0; j < 3; j++) {
 					if (mem[i][j]) {
-						if (current.GetY() + i - OFFSET_Y < 10)
+						if (current.GetY() + i - OFFSET_Y < GetHEIGHT())
 							deletehorizon[current.GetY() + i - OFFSET_Y] = true;
-						if (current.GetX() + j - OFFSET_X< 10)
+						if (current.GetX() + j - OFFSET_X< GetWIDTH())
 							deletevertical[current.GetX() + j - OFFSET_X] = true;
 					}
 				}
@@ -204,7 +209,7 @@ void Board2::FallLines(vector<bool>& deletehorizon, vector<bool>& deletevertical
 	for (int i = 0; i < GetHEIGHT(); i++) {
 		if (deletehorizon[i])
 		{
-			for (int j = 0; j < WIDTH; j++) {
+			for (int j = 0; j < GetWIDTH(); j++) {
 				mino[i + OFFSET_Y][j + OFFSET_X] = VOID;
 				for (int k = i; k > -2; k--) {
 					mino[k + OFFSET_Y][j + OFFSET_X] = mino[k + OFFSET_Y - 1][j + OFFSET_X];
@@ -213,7 +218,7 @@ void Board2::FallLines(vector<bool>& deletehorizon, vector<bool>& deletevertical
 		}
 	}
 
-	for (int i = 0; i < WIDTH; i++) {
+	for (int i = 0; i < GetWIDTH(); i++) {
 		if (deletevertical[i])
 		{
 			for (int j = 0; j < GetHEIGHT(); j++) {
@@ -248,9 +253,9 @@ void Board2::ShowRotate(int r, int k, Style& style) {
 	
 	//ミノ表示
 	for (int i = 0; i < GetHEIGHT(); i++) {
-		for (int j = 0; j < WIDTH; j++) {
-			vx1 = (j - 5) * (PIX + 1) + 1 + 5;
-			vy1 = (i - 5) * (PIX + 1) + 1 + 5;
+		for (int j = 0; j < GetWIDTH(); j++) {
+			vx1 = (j - GetWIDTH() / 2) * (PIX + 1) + 1 + PIX / 2;
+			vy1 = (i - GetHEIGHT() / 2) * (PIX + 1) + 1 + PIX / 2;
 			vx2 = (int)(cos(rad) * vx1 - sin(rad) * vy1);
 			vy2 = (int)(sin(rad) * vx1 + cos(rad) * vy1);
 			if (GetMino(OFFSET_X + j, OFFSET_Y + i) > 0) {
@@ -264,9 +269,10 @@ void Board2::ShowRotate(int r, int k, Style& style) {
 	}
 
 
-	for (int i = 0; i < WIDTH + 1; i++) {
-		vx1 = (i - 5) * (PIX + 1);
-		vy1 = -5 * (PIX + 1);
+	//境界線表示
+	for (int i = 0; i < GetWIDTH() + 1; i++) {
+		vx1 = (i - GetWIDTH() / 2) * (PIX + 1);
+		vy1 = -GetHEIGHT() / 2 * (PIX + 1);
 		vx2 = (int)(cos(rad) * vx1 - sin(rad) * vy1);
 		vy2 = (int)(sin(rad) * vx1 + cos(rad) * vy1);
 		vx3 = (int)(cos(rad) * vx1 + sin(rad) * vy1);
@@ -274,8 +280,8 @@ void Board2::ShowRotate(int r, int k, Style& style) {
 		DrawLine(mx + vx2, my + vy2, mx + vx3, my + vy3, 0xFFFFFF);
 	}
 	for (int i = 0; i < GetHEIGHT() + 1; i++) {
-		vx1 = -5 * (PIX + 1);
-		vy1 = (i - 5) * (PIX + 1);
+		vx1 = -GetWIDTH() / 2 * (PIX + 1);
+		vy1 = (i - GetHEIGHT() / 2) * (PIX + 1);
 		vx2 = (int)(cos(rad) * vx1 - sin(rad) * vy1);
 		vy2 = (int)(sin(rad) * vx1 + cos(rad) * vy1);
 		vx3 = (int)( - cos(rad) * vx1 - sin(rad) * vy1);

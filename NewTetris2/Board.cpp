@@ -13,17 +13,17 @@ const Offset diffTable[2][5] = {
 Board::Board()
 {
 
-	mino.resize(GetHEIGHT() + 2 + 2 * WALLTHICK, vector<int>(WIDTH + 2 * WALLTHICK));
+	mino.resize(GetHEIGHT() + 2 + 2 * WALLTHICK, vector<int>(GetWIDTH() + 2 * WALLTHICK));
 	for (int i = OFFSET_Y - 2; i < GetHEIGHT() + OFFSET_Y; i++)
-		for (int j = OFFSET_X; j < WIDTH + OFFSET_X; j++)
+		for (int j = OFFSET_X; j < GetWIDTH() + OFFSET_X; j++)
 			mino[i][j] = VOID;
 
-	for (int i = 0; i < WIDTH + 2 * WALLTHICK; i++)
+	for (int i = 0; i < GetWIDTH() + 2 * WALLTHICK; i++)
 	{
 		mino[0][i] = WALL;
 		mino[1][i] = WALL;
 		mino[2][i] = WALL;
-		mino[GetHEIGHT() + 5][i] = WALL;
+		mino[GetHEIGHT() + 5][i] = WALL;//下底(3)+高さ(見えている分20)+高さ(見えていない分(2))+上底(3)
 		mino[GetHEIGHT() + 6][i] = WALL;
 		mino[GetHEIGHT() + 7][i] = WALL;
 	}
@@ -40,9 +40,11 @@ Board::Board()
 
 int Board::GetHEIGHT() { return 20; }
 
+int Board::GetWIDTH() { return 10; }
+
 void Board::Reset() {
 	for (int i = OFFSET_Y; i < GetHEIGHT() + OFFSET_Y; i++) {
-		for (int j = OFFSET_X; j < WIDTH + OFFSET_X; j++) {
+		for (int j = OFFSET_X; j < GetWIDTH() + OFFSET_X; j++) {
 			SetMino(j, i, VOID);
 		}
 	}
@@ -110,7 +112,7 @@ bool Board::TouchSideWall(int s, Mino& current) {
 bool Board::TouchUp(Mino& current) {
 	//上部に触れたら
 	for (int i = 3; i < OFFSET_Y; i++) {
-		for (int j = OFFSET_X; j < WIDTH + OFFSET_X; j++) {
+		for (int j = OFFSET_X; j < GetWIDTH() + OFFSET_X; j++) {
 			if (isFixedMino(j,i)) {
 				return true;
 			}
@@ -188,7 +190,7 @@ bool Board::ClearLines(vector<bool>& deletelist) {
 	bool canDelete = false;
 	for (int i = 0; i < GetHEIGHT(); i++) {
 		deletelist[i] = true;
-		for (int j = 0; j < WIDTH; j++) {
+		for (int j = 0; j < GetWIDTH(); j++) {
 			if (!isFixedMino(j + OFFSET_X, i + OFFSET_Y))
 			{
 				deletelist[i] = false;
@@ -206,7 +208,7 @@ void Board::FallLines(vector<bool>& deletelist) {
 	for (int i = 0; i < GetHEIGHT(); i++) {
 		if (deletelist[i])
 		{
-			for (int j = 0; j < WIDTH; j++) {
+			for (int j = 0; j < GetWIDTH(); j++) {
 				mino[i + OFFSET_Y][j + OFFSET_X] = VOID;
 				for (int k = i; k > -2; k--) {
 					mino[k + OFFSET_Y][j + OFFSET_X] = mino[k + OFFSET_Y - 1][j + OFFSET_X];
@@ -219,7 +221,7 @@ void Board::FallLines(vector<bool>& deletelist) {
 //全消し判定
 bool Board::IsPerfectClear() {
 	for (int i = 3; i < GetHEIGHT() + OFFSET_Y; i++) {
-		for (int j = OFFSET_X; j < WIDTH + OFFSET_X; j++) {
+		for (int j = OFFSET_X; j < GetWIDTH() + OFFSET_X; j++) {
 			if (isFixedMino(j, i))
 				return false;
 		}
@@ -267,7 +269,7 @@ void Board::Show(Style& style){
 	DrawGraph(0, 0, style.GetBackStyle(), TRUE);
 	//ミノ表示
 	for (int i = 0; i < GetHEIGHT(); i++) {
-		for (int j = 0; j < WIDTH; j++) {
+		for (int j = 0; j < GetWIDTH(); j++) {
 			if (GetMino(OFFSET_X + j, OFFSET_Y + i)>0) {
 				DrawGraph(LEFTSIDE + j * (PIX + 1) + 1, UPSIDE + i * (PIX + 1) + 1, style.GetStyle(GetMino(OFFSET_X + j, OFFSET_Y + i) - FIXEDI), TRUE);
 			}
@@ -278,10 +280,10 @@ void Board::Show(Style& style){
 		}
 	}
 	//線
-	for (int i = 0; i < WIDTH + 1; i++) {
+	for (int i = 0; i < GetWIDTH() + 1; i++) {
 		DrawLine(LEFTSIDE + i * (PIX + 1), UPSIDE, LEFTSIDE + i * (PIX + 1), UPSIDE + GetHEIGHT() * (PIX + 1), 0xFFFFFF);
 	}
 	for (int i = 0; i < GetHEIGHT() + 1; i++) {
-		DrawLine(LEFTSIDE, 200 + i * (PIX + 1), LEFTSIDE + WIDTH * (PIX + 1), UPSIDE + i * (PIX + 1), 0xFFFFFF);
+		DrawLine(LEFTSIDE, 200 + i * (PIX + 1), LEFTSIDE + GetWIDTH() * (PIX + 1), UPSIDE + i * (PIX + 1), 0xFFFFFF);
 	}
 }

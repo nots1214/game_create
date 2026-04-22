@@ -14,10 +14,10 @@ char condition[10][50] = {
 	"Perform a PerfectClear in 10 moves!"
 };
 
-Challenge::Challenge() {
+Challenge::Challenge(int maxstage) : Game(6) {
 	scTimer = 0;
 	state = State::Playing;
-	stage = 0;
+	stage = maxstage;
 	step[0] = 5;
 	step[1] = 2;
 	step[2] = 1;
@@ -125,7 +125,7 @@ void Challenge::Clearing() {
 			scTimer = 0;
 		}
 	}
-	for (int i = 0; i < 20; i++) {
+	for (int i = 0; i < board->GetHEIGHT(); i++) {
 		deletelist[i] = false;
 	}
 }
@@ -266,6 +266,7 @@ void Challenge::AfterLock() {
 void Challenge::ShowString() {
 	DrawGraph(495, 300, style.GetCommandStyle(1), TRUE);
 	DrawGraph(605, 450, style.GetCommandStyle(2), TRUE);
+	DrawGraph(711, 450, style.GetCommandStyle(7), TRUE);
 	if (stage < 8)
 		DrawGraph(585, 455, style.GetCrossStyle(), TRUE);
 	if (state == State::GameOver) {
@@ -303,9 +304,9 @@ void Challenge::ShowClear() {
 		for (int i = 0; i < board->GetHEIGHT(); i++) {
 			if (deletelist[i])
 			{
-				for (int j = 0; j < WIDTH; j++)
+				for (int j = 0; j < board->GetWIDTH(); j++)
 				{
-					if (clearframe - j >= 0 && clearframe - j < 10)
+					if (clearframe - j >= 0 && clearframe - j < board->GetWIDTH())
 						DrawGraph(LEFTSIDE + j * (PIX + 1) - 1, UPSIDE + i * (PIX + 1) - 1, style.GetExplosionStyle(clearframe - j), TRUE);
 				}
 			}
@@ -364,6 +365,8 @@ void Challenge::Update(Record& record) {
 	case State::Next:
 		Next();
 		break;
+	case State::Pausing:
+		break;
 	}
 	if (scTimer > 0)
 		scTimer--;
@@ -387,7 +390,7 @@ int Challenge::MainChallenge(Record& record) {
 		else {
 			if (CheckHitKey(KEY_INPUT_ESCAPE) == 1)break; //Escで終了
 			Update(record);
-			Show();
+			if (state != State::Pausing) Show();
 			if (state == State::GameOver)
 			{
 				audio.stopBGM2();

@@ -4,7 +4,7 @@
 const int scorebonus[5] = { 0, 1000,2000,4000,10000 };
 const int renbonus[10] = { 0,100,200,300,500,700,900,1300,1700,2500 };
 
-Game::Game() {
+Game::Game(int centerx) : current(centerx) {
 	board = new Board();
 	gravityTimer = 0;
 	waitingTimer = 0;
@@ -23,6 +23,7 @@ Game::Game() {
 	nextfall = GRA;
 	level = 0;
 	clearframe = 0;
+	pauseselect = 0;
 }
 
 void Game::DrawNums(int x,int y,int value) {
@@ -83,7 +84,7 @@ void Game::Shading() {
 
 void Game::CalculateScore() {
 	int clearnum = 0;
-	for (int i = 0; i < 20; i++) {
+	for (int i = 0; i < board->GetHEIGHT(); i++) {
 		if (deletelist[i])
 			clearnum++;
 	}
@@ -136,7 +137,7 @@ void Game::Clearing() {
 
 int Game::Num_of_Lines() {
 	int tetriscnt = 0;
-	for (int i = 0; i < 20; i++) {
+	for (int i = 0; i < board->GetHEIGHT(); i++) {
 		if (deletelist[i])
 			tetriscnt++;
 	}
@@ -254,6 +255,13 @@ void Game::AfterLock(){
 	waitingTimer = 0;
 }
 
+//ポーズ画面
+void Game::Pausing() {
+	state = State::Pausing;
+	pauseselect = 0;
+	ShowPause();
+}
+
 //長押し判定
 void Game::Holding() {
 	if (nowaction.moveleft)
@@ -281,35 +289,59 @@ void Game::Holding() {
 void Game::KeyInput(Record& record) {
 	prevaction = nowaction;
 	nowaction = input.GetCommand();
+	prevcommand = nowcommand;
+	nowcommand = input.GetMenuCommand();
 
 	Holding();
 
-	if (state != State::Playing) return;
+	if (state == State::Playing) {
+		if (nowaction.rotateL && !prevaction.rotateL)
+			RotateLeft();
+		if (nowaction.rotateR && !prevaction.rotateR)
+			RotateRight();
+		if (nowaction.moveleft && locktimeL <= 0)
+			MoveLeft();
+		if (nowaction.moveright && locktimeR <= 0)
+			MoveRight();
+		if (nowaction.quickdrop && !prevaction.quickdrop)
+			QuickDrop();
+		if (nowaction.fastfall)
+			FastFall();
+		if (nowaction.sethold && !prevaction.sethold)
+			Hold();
+		if (nowaction.pausing && !prevaction.pausing)
+			Pausing();
 
+		if (locktimeL > 0) locktimeL--;
+		if (locktimeR > 0) locktimeR--;
+	}
+	else if (state == State::Pausing)
+	{
+		if (nowaction.pausing && !prevaction.pausing)
+			state = State::Playing;
 
-	if (nowaction.rotateL && !prevaction.rotateL)
-		RotateLeft();
-	if (nowaction.rotateR && !prevaction.rotateR)
-		RotateRight();
-	if (nowaction.moveleft && locktimeL <= 0)
-		MoveLeft();
-	if (nowaction.moveright && locktimeR <= 0)
-		MoveRight();
-	if (nowaction.quickdrop && !prevaction.quickdrop)
-		QuickDrop();
-	if(nowaction.fastfall)
-		FastFall();
-	if(nowaction.sethold && !prevaction.sethold)
-		Hold();
-
-	if (locktimeL > 0) locktimeL--;
-	if (locktimeR > 0) locktimeR--;
+		if (!prevcommand.up && nowcommand.up) pauseselect = (pauseselect + 1) % 2;
+		if (!prevcommand.down && nowcommand.down) pauseselect = (pauseselect + 1) % 2;
+		if (!prevcommand.select && nowcommand.select) {
+			if (pauseselect == 0)
+			{
+				state = State::Playing;
+			}
+			if (pauseselect == 1) {
+				state = State::GameOver;
+				pauseselect = 0;
+			}
+		}
+		if ((!prevcommand.up && nowcommand.up) || (!prevcommand.down && nowcommand.down))
+			ShowPause();
+	}
 }
 
 
 void Game::ShowString(Record& record) {
 	DrawGraph(495, 300, style.GetCommandStyle(1), TRUE);
 	DrawGraph(605, 450, style.GetCommandStyle(2), TRUE);
+	DrawGraph(711, 450, style.GetCommandStyle(7), TRUE);
 
 	if (state == State::GameOver) {
 		DrawGraph(LEFTSIDE - 20, UPSIDE + PIX * 5, style.GetGOStyle(), TRUE);
@@ -357,9 +389,9 @@ void Game::ShowClear(Record& record) {
 		for (int i = 0; i < board->GetHEIGHT(); i++) {
 			if (deletelist[i])
 			{
-				for (int j = 0; j < WIDTH; j++)
+				for (int j = 0; j < board->GetWIDTH(); j++)
 				{
-					if (clearframe - j >= 0 && clearframe - j < 10)
+					if (clearframe - j >= 0 && clearframe - j < board->GetWIDTH())
 						DrawGraph(LEFTSIDE + j * (PIX + 1) - 1, UPSIDE + i * (PIX + 1) - 1, style.GetExplosionStyle(clearframe - j), TRUE);
 				}
 			}
@@ -382,6 +414,16 @@ void Game::ShowSpin() {
 		DrawGraph(LEFTSIDE - 70, 400, style.GetSpinStyle(static_cast<int>(current.GetShape())),TRUE);
 	if (spinboard != -1)
 		DrawGraph(LEFTSIDE - 70, 300, style.GetSpinStyle(7), TRUE);
+}
+
+void Game::ShowPause() {
+	for (int i = -2; i < 5; i++) {
+		for (int j = -2; j < 20; j++) {
+			DrawGraph(78 + 10 * j, 268 + 10 * i, style.GetVoidStyle(), TRUE);
+		}
+	}
+	DrawGraph(100, 250, style.GetRestartStyle(), TRUE);
+	DrawGraph(69, 256 + pauseselect * 30, style.GetArrowStyle(), TRUE);
 }
 
 //表示
@@ -417,7 +459,9 @@ void Game::Update(Record& record) {
 		Clearing();
 		break;
 	case State::GameOver:
-		WaitTimer(5000);
+		WaitTimer(100);
+		break;
+	case State::Pausing:
 		break;
 	}
 	if (pcTimer > 0)
@@ -442,7 +486,7 @@ void Game::MainGame(Record& record) {
 			if (CheckHitKey(KEY_INPUT_ESCAPE) == 1) break; //Escで終了
 			
 			Update(record);
-			Show(record);
+			if(state != State::Pausing) Show(record);
 			if (state == State::GameOver)
 			{
 				record.SetScore(score);

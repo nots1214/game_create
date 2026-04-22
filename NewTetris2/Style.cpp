@@ -8,7 +8,7 @@ char sc[19] = "img/stageclear.png";
 char gc[19] = "img/gameclear.png";
 char go[19] = "img/gameover.png";
 char arrow[14] = "img/arrow.png";
-char command[7][19] = { "img/command1.png","img/command2.png", "img/command3.png","img/command4.png","img/command5.png","img/command6.png","img/command7.png"};
+char command[8][19] = { "img/command1.png","img/command2.png", "img/command3.png","img/command4.png","img/command5.png","img/command6.png","img/command7.png","img/command8.png" };
 char restart[19] = "img/restart.png";
 char title[3][18] = { "img/newtitle.png", "img/Menu2.png", "img/newmode.png"};
 char spin[8][14] = { "img/Ispin.png","img/Tspin.png","img/Jspin.png","img/Lspin.png","img/Zspin.png","img/Sspin.png","img/Ospin.png","img/Bspin.png" };
@@ -28,7 +28,7 @@ Style::Style() {
 	gcGraph = LoadGraph(gc);
 	goGraph = LoadGraph(go);
 	arrowGraph = LoadGraph(arrow);
-	for (int i = 0; i < 7; i++)
+	for (int i = 0; i < 8; i++)
 		commandGraph[i] = LoadGraph(command[i]);
 	restartGraph = LoadGraph(restart);
 	for (int i = 0; i < 3; i++) {

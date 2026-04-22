@@ -10,7 +10,7 @@ private:
 	int gcGraph;
 	int goGraph;
 	int arrowGraph;
-	int commandGraph[7];
+	int commandGraph[8];
 	int restartGraph;
 	int titleGraph[3];
 	int spinGraph[8];

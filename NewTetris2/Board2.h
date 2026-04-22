@@ -20,5 +20,6 @@ public:
 	bool ClearLines(vector<bool>& deletehorizon, vector<bool>& deletevertical,int spinboard,Mino& current, vector<vector<bool>>& mem) override;
 	void FallLines(vector<bool>& deletehorizon, vector<bool>& deletevertical) override;
 	virtual int GetHEIGHT() override;
+	virtual int GetWIDTH() override;
 	void ShowRotate(int r, int k, Style& style) override;
 };

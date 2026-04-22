@@ -24,5 +24,5 @@ private:
 	void ShowClear(Record& record) override;
 	void ShowRotate(int r, Record& record);
 public:
-	Game2();
+	Game2(int centerx);
 };

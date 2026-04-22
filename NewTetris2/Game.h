@@ -16,13 +16,14 @@
 #define HOLDBUTTON 5
 
 enum class State {
-	Playing,
-	LockDelay,
-	Setting,
-	Clearing,
-	GameOver,
-	GameClear,
-	Next
+	Playing, //操作可能状態
+	LockDelay, //ミノ接地後の硬直
+	Setting, //接地中
+	Clearing, //消去中
+	GameOver, //ゲームオーバー
+	GameClear, //ゲームクリアー
+	Next, //次のステージ準備
+	Pausing //ポーズ画面
 };
 
 class Game {
@@ -37,6 +38,8 @@ protected:
 
 	InputState nowaction;
 	InputState prevaction;
+	InputMenu nowcommand;
+	InputMenu prevcommand;
 
 	int gravityTimer;
 	int waitingTimer;
@@ -55,6 +58,7 @@ protected:
 	int nextfall;
 	int level;
 	int clearframe;
+	int pauseselect;
 
 	virtual void GRAVITYFall();
 	virtual void ResetMino();
@@ -77,14 +81,16 @@ protected:
 	virtual void RotateRight();
 	virtual void Hold();
 	virtual void AfterLock();
+	virtual void Pausing();
 
 	virtual void ShowString(Record& record);
 	virtual void ShowClear(Record& record);
 	void ShowPC();
 	virtual void ShowSpin();
+	virtual void ShowPause();
 	void DrawNums(int x, int y, int value);
 public:
-	Game();
+	Game(int centerx);
 	inline int GetScore() { return score; }
 	virtual void MainGame(Record& record);
 	virtual void Show(Record& record);

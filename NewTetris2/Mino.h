@@ -9,7 +9,7 @@ using namespace std;
 #define UPSIDE 200
 #define WALLTHICK 3
 #define PIX 10  //1マスの辺の長さ
-#define CENTER_X 6
+//#define CENTER_X 6
 #define UP_Y 4
 #define NEXT_X 500
 #define NEXT_Y 150
@@ -45,6 +45,7 @@ private:
 	TetroMino hold;
 	int dx;
 	int dy;
+	int CENTER_X;
 
 	void ReturnMino(TetroMino shape);
 	TetroMino CreateMino();
@@ -52,7 +53,7 @@ private:
 	int TF(int num);
 
 public:
-	Mino();
+	Mino(int cx);
 	void NewMino();
 	void init_mino();
 	void initChallenge(vector<TetroMino>& loc);
